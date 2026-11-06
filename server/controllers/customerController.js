@@ -1,6 +1,5 @@
 
 const Customer = require("../models/customer");
-
 // 1. Create Customer
 const createCustomer = async (req, res) => {
     try {
@@ -108,10 +107,7 @@ const updateCustomer = async (req, res) => {
         const customer = await Customer.findByIdAndUpdate(
             req.params.id,
             { $set: updates },
-            {
-                new: true,
-                runValidators: true
-            }
+            { returnDocument: "after", runValidators: true }
         );
         if (!customer) {
             return res.status(404).json({
