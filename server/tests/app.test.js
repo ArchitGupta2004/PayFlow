@@ -1,6 +1,7 @@
 const request = require("supertest");
 const app = require("../app");
 const Customer = require("../models/customer");
+// Basic API Tests
 describe("PayFlow API Tests", () => {
     test("GET / should return welcome message", async () => {
         const response = await request(app).get("/");
@@ -12,7 +13,17 @@ describe("PayFlow API Tests", () => {
         expect(response.statusCode).toBe(200);
         expect(response.body.success).toBe(true);
     });
+    // Error Middleware Test
+    test("Error middleware should return 404 for unknown routes", async () => {
+        const response = await request(app)
+            .get("/api/unknown-route");
+        expect(response.statusCode).toBe(404);
+        expect(response.body.success).toBe(false);
+        expect(response.body.message).toBe("Route not found");
+    });
 });
+
+// Customer API Tests
 
 describe("Customer API Tests", () => {
     beforeEach(async () => {
@@ -36,7 +47,6 @@ describe("Customer API Tests", () => {
     });
 
     // POST: Missing Required Fields
-
     test("POST /api/customers should reject missing required fields", async () => {
         const response = await request(app)
             .post("/api/customers")
@@ -64,11 +74,11 @@ describe("Customer API Tests", () => {
                 email: "rahul@example.com",
                 phone: "9999999999"
             });
+
         expect(response.statusCode).toBe(409);
     });
 
     // GET: All Customers
-
     test("GET /api/customers should return all customers", async () => {
         await Customer.create([
             {
@@ -82,12 +92,12 @@ describe("Customer API Tests", () => {
                 phone: "9999999999"
             }
         ]);
-        const response = await request(app).get("/api/customers");
+        const response = await request(app)
+            .get("/api/customers");
         expect(response.statusCode).toBe(200);
         expect(response.body.success).toBe(true);
         expect(response.body.data).toHaveLength(2);
     });
-
     // GET: Customer By ID
 
     test("GET /api/customers/:id should return a specific customer", async () => {
@@ -96,7 +106,6 @@ describe("Customer API Tests", () => {
             email: "rahul@example.com",
             phone: "9876543210"
         });
-
         const response = await request(app)
             .get(`/api/customers/${customer._id}`);
         expect(response.statusCode).toBe(200);
@@ -117,6 +126,7 @@ describe("Customer API Tests", () => {
             .send({
                 name: "Rahul Sharma"
             });
+
         expect(response.statusCode).toBe(200);
         expect(response.body.success).toBe(true);
         expect(response.body.data.name).toBe("Rahul Sharma");
@@ -160,5 +170,4 @@ describe("Customer API Tests", () => {
             .delete(`/api/customers/${customer._id}`);
         expect(response.statusCode).toBe(404);
     });
-
 });
